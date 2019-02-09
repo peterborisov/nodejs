@@ -21,3 +21,15 @@ module.exports.products.findByName = (name) => {
 
     return null;
 };
+
+module.exports.products.filterByQuery = (query) => {
+    let result = [];
+
+    for (let product of products) {
+        if (product.name.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+            result.push(product);
+        }
+    }
+
+    return result;
+};
