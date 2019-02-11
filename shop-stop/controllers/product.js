@@ -4,6 +4,8 @@ const FS = require('fs');
 const PATH = require('path');
 const QS = require('querystring');
 const DB = require('../config/database');
+const MULTIPARTY = require('multiparty');
+const SHORTID = require('shortid');
 
 /**
  * 
@@ -22,11 +24,11 @@ module.exports = (req, res) => {
         res.writeHead(200, {
             'Content-Type': 'text/html'
         });
-                
+
         READ.on('open', () => {
             READ.pipe(res);
         });
-        
+
         READ.on('error', (err) => {
             res.writeHead(404, {
                 'Content-Type': 'text/plain'
@@ -37,14 +39,45 @@ module.exports = (req, res) => {
         });
 
     } else if (req.pathname === '/product/add' && req.method === 'POST') {
-        let dataString = '';
+        let form = new MULTIPARTY.Form();
+        let product = {};
 
-        req.on('data', (data) => {
-            dataString += data;
+        form.on('part', (part) => {
+            if (part.filename) {
+                let dataString = '';
+                let extension = part.filename.split('.')[1];
+
+                part.setEncoding('binary');
+                part.on('data', (data) => {
+                    dataString += data;
+                });
+
+                part.on('end', () => {
+                    let fileName = SHORTID.generate();
+                    let filePath = `./content/images/${fileName}.${extension}`;
+
+                    product.image = filePath;
+                    FS.writeFile(filePath, dataString, { encoding: 'ascii' }, (err) => {
+                        if (err) {
+                            return;
+                        }
+                    });
+                });
+            } else {
+                part.setEncoding('utf-8');
+                let field = '';
+
+                part.on('data', (data) => {
+                    field += data;
+                });
+
+                part.on('end', () => {
+                    product[part.name] = field;
+                });
+            }
         });
 
-        req.on('end', () => {
-            let product = QS.parse(dataString);
+        form.on('close', () => {
             DB.products.add(product);
 
             res.writeHead(302, {
@@ -53,6 +86,8 @@ module.exports = (req, res) => {
 
             res.end();
         });
+
+        form.parse(req);
     } else {
         return true;
     }
