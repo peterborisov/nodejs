@@ -3,9 +3,10 @@ const URL = require('url');
 const FS = require('fs');
 const PATH = require('path');
 const QS = require('querystring');
-const DB = require('../config/database');
+const DB = require('../config/config');
 const MULTIPARTY = require('multiparty');
 const SHORTID = require('shortid');
+const PRODUCT = require('../models/product');
 
 /**
  * 
@@ -78,6 +79,12 @@ module.exports = (req, res) => {
         });
 
         form.on('close', () => {
+            PRODUCT.create(product).then(() => {
+                res.writeHead(302, {
+                    Location: '/'
+                });
+                res.end()
+            })
             DB.products.add(product);
 
             res.writeHead(302, {

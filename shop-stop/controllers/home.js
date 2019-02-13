@@ -2,7 +2,7 @@ const URL = require('url');
 const FS = require('fs');
 const PATH = require('path');
 const QS = require('querystring');
-const DB = require('../config/database');
+const DB = require('../config/config');
 
 module.exports = (req, res) => {
     req.pathname = req.pathname || URL.parse(req.url).pathname;
