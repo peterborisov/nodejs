@@ -1,0 +1,14 @@
+{
+  "name": "imdb",
+  "version": "1.0.0",
+  "description": "Simple node.js app to display movies and actors",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "P. B.",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  }
+}
